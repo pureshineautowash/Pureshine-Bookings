@@ -86,9 +86,29 @@ $("#followForm").onsubmit=e=>{e.preventDefault();let o=Object.fromEntries(new Fo
 $("#interval").onchange=e=>{if(e.target.value!=="Custom")$("#dueDate").value=addMonths($("#followForm").lastServiceDate.value,parseInt(e.target.value))}
 $("#deleteCustomer").onclick=()=>{let id=$("#customerForm").customerId.value;if(!id||!confirm("Delete this customer? This cannot be undone."))return;db.customers=db.customers.filter(c=>cid(c)!==id);enqueue({action:"deleteCustomer",customerId:id});render();close("customerModal");toast("Customer deleted on this device")}
 $("#deleteBooking").onclick=()=>{let id=$("#bookingForm").bookingId.value;if(!id||!confirm("Delete this booking? This cannot be undone."))return;db.bookings=db.bookings.filter(b=>bid(b)!==id);enqueue({action:"deleteBooking",bookingId:id});render();close("bookingModal");toast("Booking deleted on this device")}
-document.addEventListener("click",async e=>{let x=e.target.closest(".editCustomer");if(x){openCustomer(db.customers.find(c=>cid(c)===x.dataset.id));return}x=e.target.closest(".newBooking");if(x){openBooking(x.dataset.id);return}x=e.target.closest(".sms");if(x){sms(x.dataset.mobile,x.dataset.kind,x.dataset.name,x.dataset.date||"",x.dataset.time||"");return}x=e.target.closest(".editBooking");if(x){let b=db.bookings.find(b=>bid(b)===x.dataset.id);if(b)openBooking("",b);return}x=e.target.closest(".rebook");if(x){openRebook(x.dataset.id);return}x=e.target.closest(".status");if(x){return}x=e.target.closest(".fstatus");if(x){let opts=["Due","SMS Sent","Called","Rebooked","Skip"],v=prompt("Follow-up status:
-"+opts.join("
-"),"SMS Sent");if(!v||!opts.includes(v))return;let f=db.followups.find(f=>fid(f)===x.dataset.id);if(f)f["Follow-up Status"]=v;enqueue({action:"updateFollowupStatus",followupId:x.dataset.id,status:v});render();return}})
+document.addEventListener("click",e=>{
+  let x=e.target.closest(".editCustomer");
+  if(x){openCustomer(db.customers.find(c=>cid(c)===x.dataset.id));return}
+  x=e.target.closest(".newBooking");
+  if(x){openBooking(x.dataset.id);return}
+  x=e.target.closest(".sms");
+  if(x){sms(x.dataset.mobile,x.dataset.kind,x.dataset.name,x.dataset.date||"",x.dataset.time||"");return}
+  x=e.target.closest(".editBooking");
+  if(x){let b=db.bookings.find(b=>bid(b)===x.dataset.id);if(b)openBooking("",b);return}
+  x=e.target.closest(".rebook");
+  if(x){openRebook(x.dataset.id);return}
+  x=e.target.closest(".fstatus");
+  if(x){
+    let opts=["Due","SMS Sent","Called","Rebooked","Skip"];
+    let v=prompt("Follow-up status:\n"+opts.join("\n"),"SMS Sent");
+    if(!v||!opts.includes(v))return;
+    let f=db.followups.find(f=>fid(f)===x.dataset.id);
+    if(f)f["Follow-up Status"]=v;
+    enqueue({action:"updateFollowupStatus",followupId:x.dataset.id,status:v});
+    render();
+    return;
+  }
+});
 loadLocal();
 window.addEventListener("online",updateSyncStatus);
 window.addEventListener("offline",updateSyncStatus);
