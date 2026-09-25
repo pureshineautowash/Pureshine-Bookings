@@ -58,7 +58,7 @@ function toast(t="✓ Saved"){let e=$("#toast");e.textContent=t;e.classList.add(
 function uid(prefix){return prefix+"-"+Date.now().toString(36).toUpperCase()+"-"+Math.random().toString(36).slice(2,7).toUpperCase()}
 function saveLocal(){localStorage.setItem(DBKEY,JSON.stringify(db));localStorage.setItem(QKEY,JSON.stringify(queue));updateSyncStatus()}
 function loadLocal(){try{let d=JSON.parse(localStorage.getItem(DBKEY)||"null");if(d&&Array.isArray(d.customers))db=d}catch(_){}try{let q=JSON.parse(localStorage.getItem(QKEY)||"[]");if(Array.isArray(q))queue=q}catch(_){}render();updateSyncStatus()}
-function updateSyncStatus(){let n=queue.length,p=$("#pendingCount");if(p)p.textContent=n?`(${n})`:"";if(!navigator.onLine)sync(`Offline • ${n} change${n===1?"":"s"} waiting to sync`,n>0);else if(n)sync(`${n} change${n===1?"":"s"} waiting to sync`);else sync("✓ Local database saved • Synced")}
+function updateSyncStatus(){let n=queue.length,p=$("#pendingCount");if(p)p.textContent=n?`(${n})`:"";if(!navigator.onLine)sync(`Offline • ${n} change${n===1?"":"s"} waiting to sync`,n>0);else if(n)sync(`${n} change${n===1?"":"s"} waiting to sync`);else sync("✓ Ready • Local database loaded")}
 function enqueue(payload){queue.push(payload);saveLocal();toast("✓ Saved on this device")}
 async function readJSON(response){let text=await response.text(),start=text.indexOf("{"),end=text.lastIndexOf("}");if(start<0||end<start)throw Error("Google returned an unexpected page.");return JSON.parse(text.slice(start,end+1))}
 async function refresh(){if(!navigator.onLine){updateSyncStatus();toast("Offline — using saved database");return}sync("Refreshing from Google Sheets…");try{let r=await fetch(API+"?action=getAll&_="+Date.now(),{cache:"no-store",redirect:"follow"}),j=await readJSON(r);if(!j.ok)throw Error(j.error||"Refresh failed");db={customers:j.customers||[],bookings:j.bookings||[],followups:j.followups||[],templates:j.templates||[]};saveLocal();render();sync(queue.length?`${queue.length} local change${queue.length===1?"":"s"} still waiting to sync`:"✓ Database refreshed from Google Sheets")}catch(e){sync("Refresh failed — local database is still available",true);toast("Using offline copy")}
@@ -93,5 +93,4 @@ loadLocal();
 window.addEventListener("online",updateSyncStatus);
 window.addEventListener("offline",updateSyncStatus);
 if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{})}
-if(navigator.onLine && !localStorage.getItem(DBKEY)) refresh();
 </script></body></html>
