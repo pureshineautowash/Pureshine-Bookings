@@ -1,4 +1,4 @@
-const CACHE="pureshine-bookings-v6";
+const CACHE="pureshine-bookings-v7";
 const SHELL=["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png"];
 
 self.addEventListener("install",event=>{
