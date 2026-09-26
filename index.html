@@ -390,7 +390,23 @@ function syncFollowTime(){
 function openFollowEdit(id){let x=db.followups.find(f=>fid(f)===id);if(!x)return;let f=$("#followEditForm");f.reset();f.followupId.value=id;f.customerName.value=x["Customer Name"]||"";f.dueDate.value=x["Due Date"]||"";f.nextTime.value=x["Next Booking Time"]||"";f.rebookingInterval.value=x["Rebooking Interval"]||"";f.followupStatus.value=x["Follow-up Status"]||"Due";f.notes.value=x["Notes"]||"";open("followEditModal")
   setTimeout(()=>setFollowTimeUI($("#followTimeHidden")?$("#followTimeHidden").value:""),0);
 }
-function rebookingSms(f){let c=customer(f["Customer ID"]),n=first(c)||String(f["Customer Name"]||"").split(" ")[0]||"there",num=String(f.Mobile||c?.Mobile||"").replace(/[^\d+]/g,"");if(!num)return alert("No mobile number saved.");if(num.startsWith("0"))num="+64"+num.slice(1);let interval=f["Rebooking Interval"]||"",date=f["Due Date"]||"",time=f["Next Booking Time"]||"",schedule=interval&&!/not at/i.test(interval)?`We have you booked in every ${interval.toLowerCase()}. `:"",next=date?`Your next booking is on ${fmt(date)}${time?` at ${formatTime(time)}`:""}. `:"";let msg=`Hi ${n}, this is John of PureShine Auto Wash & Detailing. ${schedule}${next}Please reply to confirm your appointment. If something changes, please send us an SMS or give us a call on 021 459 230. Thank you!`;let a=document.createElement("a");a.href=`sms:${num}?body=${encodeURIComponent(msg)}`;document.body.appendChild(a);a.click();a.remove()}
+function rebookingSms(f){
+  let c=customer(f["Customer ID"]),n=first(c)||String(f["Customer Name"]||"").split(" ")[0]||"there",
+      num=String(f.Mobile||c?.Mobile||"").replace(/[^\d+]/g,"");
+  if(!num)return alert("No mobile number saved.");
+  if(num.startsWith("0"))num="+64"+num.slice(1);
+
+  let msg;
+  if(f._displayOnlyDone){
+    msg=`Hi ${n}, this is John from PureShine Auto Wash & Detailing. We detailed your car before and just wanted to check if you'd like to book our detailing service again. Please reply to this message or give us a call on 021 459 230 if you'd like to book. Thank you!`;
+  }else{
+    let interval=f["Rebooking Interval"]||"",date=f["Due Date"]||"",time=f["Next Booking Time"]||"",
+        schedule=interval&&!/not at/i.test(interval)?`We have you booked in every ${interval.toLowerCase()}. `:"",
+        next=date?`Your next booking is on ${fmt(date)}${time?` at ${formatTime(time)}`:""}. `:"";
+    msg=`Hi ${n}, this is John of PureShine Auto Wash & Detailing. ${schedule}${next}Please reply to confirm your appointment. If something changes, please send us an SMS or give us a call on 021 459 230. Thank you!`;
+  }
+  let a=document.createElement("a");a.href=`sms:${num}?body=${encodeURIComponent(msg)}`;document.body.appendChild(a);a.click();a.remove()
+}
 function to24Time(hour,minute,ampm){if(!hour)return"";let h=parseInt(hour,10);if(ampm==="PM"&&h<12)h+=12;if(ampm==="AM"&&h===12)h=0;return `${String(h).padStart(2,"0")}:${minute||"00"}`}
 function from24Time(t){if(!t)return {hour:"",minute:"00",ampm:"AM"};let [h,m]=t.split(":").map(Number),ap=h>=12?"PM":"AM";return {hour:String(h%12||12),minute:String(m||0).padStart(2,"0"),ampm:ap}}
 function paymentFromNotes(s){let m=String(s||"").match(/\[Payment:\s*([^\]]+)\]/i);return m?m[1].trim():""}
