@@ -645,7 +645,9 @@ function applyRebookingNoTags(){
 }
 
 function doneReferenceDate(b){
-  return String(b["Date Completed"]||b.dateCompleted||b["Booking Date"]||b.bookingDate||"").slice(0,10);
+  // Use the actual job/booking date for the 2-month display rule.
+  // This also handles historical Done jobs entered into the app later.
+  return String(b["Booking Date"]||b.bookingDate||b["Date Completed"]||b.dateCompleted||"").slice(0,10);
 }
 function isDoneOlderThanTwoMonths(b){
   if(String(b.Status||b.status||"").trim().toLowerCase()!=="done")return false;
