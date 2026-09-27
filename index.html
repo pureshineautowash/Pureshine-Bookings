@@ -894,7 +894,7 @@ document.addEventListener("click",e=>{
   }
 
   let completedSmsIntercept=e.target.closest("button");
-  if(completedSmsIntercept && (completedSmsIntercept.textContent||"").toLowerCase().includes("sms")){
+  if(completedSmsIntercept && !completedSmsIntercept.classList.contains("rebookSms") && (completedSmsIntercept.textContent||"").toLowerCase().includes("sms")){
     let card=completedSmsIntercept.closest(".card");
     if(card){
       let editBtn=[...card.querySelectorAll("button")].find(x=>(x.textContent||"").trim().toLowerCase()==="edit");
